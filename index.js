@@ -1,57 +1,90 @@
 // state
-// dispatch
+// action
 // reducer
-// store - getState(), dispatch(), subscribe()
+// store
 
-// state
-const { createStore, applyMiddleware } = require("redux");
-const { default: logger } = require("redux-logger");
+const axios = require("axios");
+const { applyMiddleware, createStore } = require("redux");
+const thunk = require("redux-thunk").default;
 
-const ADD_USER = "addUser";
-const GET_ALL_USER = "getAllUsers";
+const API_URL = "https://jsonplaceholder.typicode.com/users";
+const GET_TODOS_REQUEST = "GET_TODOS_REQUEST";
+const GET_TODOS_SUCCESS = "GET_TODOS_SUCCESS";
+const GET_TODOS_FAIL = "GET_TODOS_FAIL";
 
-const initialState = { users: ["Hayat"], count: 1 };
+const initailState = {
+	todos: [],
+	isLoading: false,
+	error: null,
+};
 
-// action function -> object type -> payload
-
-const addUser = (value) => {
+const getTodosRequest = () => {
 	return {
-		type: ADD_USER,
+		type: GET_TODOS_REQUEST,
+	};
+};
+
+const getTodosSuccess = (value) => {
+	return {
+		type: GET_TODOS_SUCCESS,
 		payload: value,
 	};
 };
 
-const getAllUsers = () => {
+const getTodosFail = (error) => {
 	return {
-		type: GET_ALL_USER,
+		type: GET_TODOS_FAIL,
+		payload: error,
 	};
 };
 
-// create a reducer
-const counterReducer = (state = initialState, action) => {
+const todoReducer = (state = initailState, action) => {
 	switch (action.type) {
-		case ADD_USER:
+		case GET_TODOS_REQUEST: {
 			return {
-				users: [...state.users, action.payload],
-				count: state.count + 1,
+				...state,
+				isLoading: true,
 			};
-		case GET_ALL_USER:
+		}
+		case GET_TODOS_SUCCESS: {
 			return {
-				users: state.users,
+				...state,
+				todos: action.payload,
+				isLoading: false,
 			};
+		}
+		case GET_TODOS_FAIL: {
+			return {
+				...state,
+				isLoading: false,
+				error: action.payload,
+			};
+		}
 		default:
 			return state;
 	}
 };
 
-// create a store
-const store = createStore(counterReducer, applyMiddleware(logger));
+const fetchRequest = (dispatch) => {
+	return () => {
+		dispatch(getTodosRequest());
+		axios
+			.get(API_URL)
+			.then((response) => {
+				dispatch(getTodosSuccess(response.data));
+			})
+			.catch((error) => {
+				dispatch(getTodosFail(error.message));
+			});
+	};
+};
+
+const store = createStore(todoReducer, applyMiddleware(thunk));
+// const store = createStore(todoReducer);
 
 store.subscribe(() => {
 	console.log(store.getState());
 });
 
-store.dispatch(addUser("Hasnat"));
-// store.dispatch(addUser("Sohan"));
-
-store.dispatch(getAllUsers());
+store.dispatch(fetchRequest());
+// store.dispatch(getTodosRequest());
