@@ -1,9 +1,9 @@
-import Todos from "./components/Todos";
+import Counter from "./features/counter/Counter";
 
 function App() {
 	return (
 		<>
-			<Todos />
+			<Counter />
 		</>
 	);
 }

@@ -16,13 +16,14 @@ const Todos = () => {
 			<h3>Todo App</h3>
 			{isLoading && <p>Loading...</p>}
 			{error && <p>{error?.message}</p>}
-			{todos.map((todo) => {
-				return (
-					<p key={todo.id} className="pl-5">
-						Name: {todo.name}
-					</p>
-				);
-			})}
+			{!isLoading &&
+				todos.map((todo) => {
+					return (
+						<p key={todo.id} className="pl-5">
+							Name: {todo.name}
+						</p>
+					);
+				})}
 		</div>
 	);
 };
